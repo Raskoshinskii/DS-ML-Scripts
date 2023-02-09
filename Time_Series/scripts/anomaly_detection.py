@@ -15,28 +15,34 @@ import seaborn as sns
 warnings.filterwarnings('ignore')
 
 
-
-def plot_moving_average(series, window, metric, scale=1.96, figsize=(12, 6), plot_intervals=False, plot_anomalies=False):
+def plot_moving_average(
+    series, window, metric,
+    scale=1.96, figsize=(12, 6),
+    plot_intervals=False, plot_anomalies=False
+):
     """
-    Plots moving average results
+    Plots moving average results.
     
-    series: DataFrame
-    
+    Parameters
+    ----------
+    series: pd.DataFrame
+        Series.
     window: int
-        Window size
-        
-    metric: func (callable)
-        e.g. MSE, MAE ... that measure error between original series and calculated trend
-
+        Window size.
+    metric: callable
+        Measures an error between original series and calculated trend 
+        (e.g. MSE, MAE).
     scale: float
-        e.g. 2/3 sigma rule  
-        
+        Sigma value (e.g. 2/3).  
     plot_intervals: bool 
-        Wether to plot confidence intervals or not 
-        
+        Wether to plot confidence intervals or not.
     plot_anomalies: bool 
-        Wether to plot anomalies or not 
+        Wether to plot anomalies or not.
     
+    Returns
+    -------
+    None
+        Plots moving average graph for the series.
     """
     rolling_mean = series.rolling(window=window).mean()
 
@@ -52,15 +58,18 @@ def plot_moving_average(series, window, metric, scale=1.96, figsize=(12, 6), plo
         upper_bound = rolling_mean + (error + scale * deviation)
         plt.plot(upper_bound, "r--", label='Upper Bound')
         plt.plot(lower_bound, "r--", label='Lower Bound')
-        plt.fill_between(x=series.index, y1=np.squeeze(upper_bound.values), y2=np.squeeze(lower_bound.values), alpha=0.2, color="grey") 
-
+        plt.fill_between(
+            x=series.index,
+            y1=np.squeeze(upper_bound.values),
+            y2=np.squeeze(lower_bound.values),
+            alpha=0.2, color="grey"
+        ) 
         # Anomalies (Values that cross Confidence Intervals)
         if plot_anomalies:
             anomalies = pd.DataFrame(index=series.index, columns=series.columns)
             anomalies[series < lower_bound] = series[series < lower_bound]
             anomalies[series > upper_bound] = series[series > upper_bound]
-            plt.plot(anomalies, "ro", markersize=10)
-            
+            plt.plot(anomalies, "ro", markersize=10)   
     plt.plot(series[window:], label="Actual values")
     plt.legend(loc="upper left")
     plt.grid(True)
@@ -69,30 +78,44 @@ def plot_moving_average(series, window, metric, scale=1.96, figsize=(12, 6), plo
 # Single Exponential Smoothing Algorithm 
 def exponential_smoothing(series, alpha):
     """
-    Exponential smoothing algorithm 
-
-    series: DataFrame
-
-    alpha: float
-        Smoothing value
+    Exponential smoothing algorithm.
     
+    Parameters
+    ----------
+    series: pd.DataFrame
+        Series.
+    alpha: float
+        Smoothing value.
+    
+    Returns
+    -------
+    list
+        List containing exponential smoothing values.
     """
     result = [series.iloc[0][0]] # first value is same as series
     for n in range(1, len(series)):
-        result.append(alpha * series.iloc[n][0] + (1 - alpha) * result[n-1])
+        result.append(
+            alpha * series.iloc[n][0] + (1 - alpha) * result[n-1]
+        )
     return result
 
 
 # Algorithm Visualization with different alpha values 
 def plot_exponential_smoothing(series, alphas, figsize=(12, 6)):
     """
-    Plots exponential smoothing using different alphas
-
-    series: DataFrame
-
-    alphas: list
-        Alphas value to try 
+    Plots exponential smoothing using different alphas.
     
+    Parameters
+    ----------
+    series: pd.DataFrame
+        Series.
+    alphas: list
+        Alphas value to experiment with.
+        
+    Returns
+    -------
+    None
+        Plots the graph.
     """
     with plt.style.context('seaborn-white'):    
         plt.figure(figsize=figsize)
@@ -108,16 +131,16 @@ def plot_exponential_smoothing(series, alphas, figsize=(12, 6)):
 # Double Exponential Smoothing Algorithm 
 def double_exponential_smoothing(series, alpha, beta):
     """
-    Double exponential smoothing algorithm
+    Double exponential smoothing algorithm.
     
-    series: DataFrame
-    
+    Parameters
+    ----------
+    series: pd.DataFrame
+        Series.
     alpha: float
-        Smoothing parameter for level
-        
+        Smoothing parameter for level.
     beta: float
-        Smoothing parameter for trend
-        
+        Smoothing parameter for trend.
     """
     # First value is same as series
     result = [series.iloc[0][0]]
@@ -132,23 +155,27 @@ def double_exponential_smoothing(series, alpha, beta):
         last_level, level = level, alpha*value + (1-alpha)*(level+trend)
         trend = beta*(level-last_level) + (1-beta)*trend
         result.append(level+trend)
-        
     return result
 
 
 # Algorithm Visualization with different alpha and beta values 
 def plot_double_exponential_smoothing(series, alphas, betas, figsize=(20, 8)):
     """
-    Plots double exponential smoothing with different alphas and betas
+    Plots double exponential smoothing with different alphas and betas.
 
-    series: DataFrame
-
+    Parameters
+    ----------
+    series: pd.DataFrame
+        Series.
     alphas: list
-        List of alpha values to try
-
+        List of alpha values to try.
     betas: list
-        List of beta values to try
-
+        List of beta values to try.
+        
+    Returns
+    -------
+    None
+        Plots the graph.
     """
     with plt.style.context('seaborn-white'):    
         plt.figure(figsize=figsize)
@@ -162,29 +189,37 @@ def plot_double_exponential_smoothing(series, alphas, betas, figsize=(20, 8)):
         plt.grid(True);
 
 
-
 # Plots Exponential Smoothing with certain parameters and detects anomalies 
-def plot_exponential_smoothing_with_anomalies(series, smoothing_func, metric, scale=1.96, figsize=(12, 6), plot_intervals=True, plot_anomalies=True, title=None):
+def plot_exponential_smoothing_with_anomalies(
+    series, smoothing_func,
+    metric, scale=1.96,
+    figsize=(12, 6),
+    plot_intervals=True,
+    plot_anomalies=True,
+    title=None
+):
     """
-    Plots exponential/double exponential smoothing using certain hyperparameters combinations 
+    Plots exponential/double exponential smoothing using certain hyperparameters combinations.
     
-    series: DataFrame
-    
+    Parameters
+    ----------
+    series: pd.DataFrame
+        Series.
     smoothing_func: callable
-        Functions to be used (e.g. exponential smoothing or double exponential smoothing)
-        
+        Functions to be used (e.g. exponential smoothing or double exponential smoothing).
     metric: callable
-        Metric function
-        
+        Metric function.
     scale: float
-        e.g. 2/3 sigma rule 
-    
+        e.g. 2/3 sigma rule.
     plot_intervals: bool 
-        Wether to plot confidence intervals or not 
-        
+        Wether to plot confidence intervals or not.
     plot_anomalies: bool 
-        Wether to plot anomalies or not 
-    
+        Wether to plot anomalies or not.
+        
+    Returns
+    -------
+    None
+        Plots the graph.
     """
     exp_smoothing_res = np.array(smoothing_func) 
     exp_smoothing_df = pd.DataFrame(exp_smoothing_res, index=series.index)  # to see the date on x axis
@@ -201,46 +236,58 @@ def plot_exponential_smoothing_with_anomalies(series, smoothing_func, metric, sc
         upper_bound = exp_smoothing_df + (error + scale * deviation)
         plt.plot(upper_bound, "r--", label='Upper Bound')
         plt.plot(lower_bound, "r--", label='Lower Bound')
-        plt.fill_between(x=series.index, y1=np.squeeze(upper_bound.values), y2=np.squeeze(lower_bound.values), alpha=0.2, color="grey") 
-        
+        plt.fill_between(
+            x=series.index,
+            y1=np.squeeze(upper_bound.values),
+            y2=np.squeeze(lower_bound.values),
+            alpha=0.2, color="grey"
+        ) 
         # Anomalies (Values that cross Confidence Intervals)
         if plot_anomalies:
             # Column names must match, otherwise not working 
             upper_bound.rename(columns={0: series.columns[0]}, inplace=True)
             lower_bound.rename(columns={0: series.columns[0]}, inplace=True)
-            
             anomalies = pd.DataFrame(index=series.index, columns=series.columns)            
             anomalies[series < lower_bound] = series[series < lower_bound]
             anomalies[series > upper_bound] = series[series > upper_bound]
             plt.plot(anomalies, "ro", markersize=10)
-        
     plt.title(title)
     plt.legend(loc="best")
     plt.grid(True);
 
 
 # CV for Holt-Winters model 
-def get_holt_cv_score(model_params, series, components_type, metric, season_len, n_splits):
+def get_holt_cv_score(
+    model_params,
+    series,
+    components_type,
+    metric,
+    season_len,
+    n_splits
+):
     """
-    Runs Time Series CV for a given model parameters list
-        
+    Runs Time Series CV for a given model parameters list.
+    
+    Parameters
+    ----------
     model_params: list
-        Parameters for the model (alpha, beta and gamma )
-        
-    series: DataFrame
-        
+        Parameters for the model (alpha, beta and gamma).
+    series: pd.DataFrame
+        Series.
     components_type: list
-        Type of a trend (always first value) and seasonal components ('additive' or 'multiplicative')
-        
+        Type of a trend (always first value) and 
+        seasonal components ('additive' or 'multiplicative').
     metric: callable
         MAPE, MSE ...
-        
     season_len: int 
-        Season length 
-        
+        Season length. 
     cv_splits: int 
-        Number of CV splits 
-        
+        Number of CV splits.
+    
+    Returns 
+    -------
+    np.array
+        Array with CV results.
     """
     cv_errors = []
     ts_values = series.values
@@ -254,47 +301,48 @@ def get_holt_cv_score(model_params, series, components_type, metric, season_len,
     for train_indxs, test_indxs in timeseries_cv.split(ts_values):
         model = ExponentialSmoothing(endog=ts_values[train_indxs], trend=trend, seasonal=seasonal, seasonal_periods=season_len)
         model = model.fit(smoothing_level=alpha, smoothing_trend=beta, smoothing_seasonal=gamma)
-        
         actual = ts_values[test_indxs]
         preds = model.forecast(steps=len(test_indxs))
         error = metric(actual, preds)
         cv_errors.append(error)
-        
     return np.mean(cv_errors)
 
 
-def optimize_holt_hyperparams(model_params, series, components_type, metric, season_len, n_splits, show_cv_score=True):
+def optimize_holt_hyperparams(
+    model_params, series,
+    components_type, metric,
+    season_len, n_splits,
+    show_cv_score=True
+):
     """
     Find the best alpha, beta and gamma values for Holt-Winters model 
-    using minimize function from scipy.optimize module and get_holt_cv_score function
+    using minimize function from scipy.optimize module and get_holt_cv_score function.
     
+    Parameters
+    ----------
     model_params: list
-    
     series: DataFrame
-    
+        Series.
     components_type: list
         Type of trend (always first value) and seasonal components ('additive' or 'multiplicative')
-        
     metric: callable
         MAPE, MSE ...
-        
     season_len: int 
         Season length 
-        
     cv_splits: int 
         Number of CV splits 
-    
     Note:
-        minimize returns a dictionary and the optimal hyperparameters are located in x key  
-    
-    """
-        
+        minimize returns a dictionary and the optimal hyperparameters are located in x key.
+    ---
+    """ 
     # Minimize the loss 
-    opt_params = minimize(get_holt_cv_score, 
-                          x0=model_params,
-                          args=(series, components_type, metric, season_len, n_splits),
-                          method="TNC",
-                          bounds=((0, 1), (0, 1), (0, 1)))
+    opt_params = minimize(
+        get_holt_cv_score, 
+        x0=model_params,
+        args=(series, components_type, metric, season_len, n_splits),
+        method="TNC",
+        bounds=((0, 1), (0, 1), (0, 1))
+    )
     
     # Found hyperparameters
     alpha_opt, beta_opt, gamma_opt = opt_params.x
@@ -305,53 +353,66 @@ def optimize_holt_hyperparams(model_params, series, components_type, metric, sea
     trend, seasonal = components_type
     model = ExponentialSmoothing(endog=series, trend=trend, seasonal=seasonal, seasonal_periods=season_len)
     model = model.fit(smoothing_level=alpha_opt, smoothing_trend=beta_opt, smoothing_seasonal=gamma_opt)
-    
+
     if show_cv_score:
-        cv_score = get_holt_cv_score(model_params=[alpha_opt, beta_opt, gamma_opt],
-                                     series=series,
-                                     components_type=components_type,
-                                     metric=metric,
-                                     season_len=season_len,
-                                     n_splits=n_splits)
+        cv_score = get_holt_cv_score(
+            model_params=[alpha_opt, beta_opt, gamma_opt],
+            series=series,
+            components_type=components_type,
+            metric=metric,
+            season_len=season_len,
+            n_splits=n_splits
+        )
         print(round(cv_score, 2))
-    
     return model
 
 
-def plot_holt_forecast(model, train_data, metric, test_data=None, scale=1.96, figsize=(12, 6), plot_intervals=True, plot_anomalies=True, title=None):
+def plot_holt_forecast(
+    model, train_data, metric,
+    test_data=None, scale=1.96,
+    figsize=(12, 6), plot_intervals=True,
+    plot_anomalies=True, title=None
+):
     """
-    Plots Holt-Winters model forecast using already fitted model
+    Plots Holt-Winters model forecast using already fitted model.
     
-    train_data: DataFrame
-            
+    Parameters
+    ----------
+    train_data: DataFrame.
     metric: callable
-        Metric function
-    
+        Metric function.
     scale: float
-        e.g. 2/3 sigma rule 
-    
+        e.g. 2/3 sigma rule. 
     plot_intervals: bool 
-        Wether to plot confidence intervals or not 
-        
+        Wether to plot confidence intervals or not.
     plot_anomalies: bool 
-        Wether to plot anomalies or not 
-    
+        Wether to plot anomalies or not.
+    ----
     """
     # Create DataFrame because train_data is a DataFrame as well 
     forecast_train = model.predict(train_data.index[0], train_data.index[-1])
     forecast_train_df = pd.DataFrame(forecast_train, index=forecast_train.index)
     
     if test_data is not None:
-        forecast_test = model.predict(test_data.index[0], test_data.index[-1])
-        forecast_test_df = pd.DataFrame(forecast_test, index=forecast_test.index)
+        forecast_test = model.predict(
+            test_data.index[0], test_data.index[-1]
+        )
+        forecast_test_df = pd.DataFrame(
+            forecast_test, index=forecast_test.index
+        )
         main_df = pd.concat([forecast_train_df, forecast_test_df])
     
     plt.figure(figsize=figsize)
     plt.plot(train_data, label='Actual')        
     plt.plot(main_df, 'g', label="Model")
-    
-    plt.axvline(train_data.index[-1], ymin=0.05, ymax=0.95,  ls='--', color='purple', lw=2.5)
-    title = ' '.join([word.capitalize() for word in metric.__name__.split('_')]) + ' Train' + f''
+    plt.axvline(
+        train_data.index[-1],
+        ymin=0.05, ymax=0.95,
+        ls='--', color='purple', lw=2.5
+    )
+    title = ' '.join([
+        word.capitalize() for word in metric.__name__.split('_')
+    ]) + ' Train' + f''
     plt.title(title)
     plt.legend(loc="best")
     plt.grid(True)
@@ -365,9 +426,15 @@ def plot_holt_forecast(model, train_data, metric, test_data=None, scale=1.96, fi
        
         plt.plot(lower_bound, "r--", label='Lower Bound')
         plt.plot(upper_bound, "r--", label='Upper Bound')
-        plt.fill_between(x=main_df.index, y1=np.squeeze(upper_bound.values), y2=np.squeeze(lower_bound.values), alpha=0.2, color="grey") 
-        
-        title = ' '.join([word.capitalize() for word in metric.__name__.split('_')]) + ' Train ' + f'{round(error, 2)}'
+        plt.fill_between(
+            x=main_df.index,
+            y1=np.squeeze(upper_bound.values),
+            y2=np.squeeze(lower_bound.values),
+            alpha=0.2, color="grey"
+        ) 
+        title = ' '.join([
+            word.capitalize() for word in metric.__name__.split('_')
+        ]) + ' Train ' + f'{round(error, 2)}'
         plt.title(title)    
         
         # Anomalies (Values that cross Confidence Intervals)

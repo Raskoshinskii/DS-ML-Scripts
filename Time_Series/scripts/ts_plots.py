@@ -11,13 +11,19 @@ from sklearn.decomposition import PCA
 
 def plot_sereis(series, x_label=None, y_label=None):
     """
-    Plots timeseries
+    Plots timeseries.
     
-    series: DataFrame
-    
+    Parameters
+    ----------
+    series: pd.DataFrame or pd.Series
+        Time series data.
     x_label: str
-        x axis name 
+        x axis name.
     
+    Returns
+    -------
+    None
+        Plots time series data.
     """
     plt.figure(figsize=(20,8))
     plt.plot(series)
@@ -28,16 +34,21 @@ def plot_sereis(series, x_label=None, y_label=None):
 
 def plot_decomposition(series, figsize = (12, 9), grid=True):
     """
-    Plots timeseries decomposition (trend, seasonal, residuals)
+    Plots timeseries decomposition (trend, seasonal, residuals).
     
-    series: DataFrame
-    
+    Parameters
+    ----------
+    series: pd.DataFrame
+        Time series data.
     figsize: tuple 
-        Figure size
-        
+        Figure size.
     grid: bool
-        Wether to plot grid or not
+        Wether to plot grid or not.
     
+    Returns
+    -------
+    None
+        Plots timeseries decomposition.
     """
     ts_compnts = sm.tsa.seasonal_decompose(series, period=360)
     titles = ['Origianl', 'Trend', 'Seasonal', 'Resid']
@@ -50,7 +61,6 @@ def plot_decomposition(series, figsize = (12, 9), grid=True):
     ax[1].plot(ts_compnts.trend)
     ax[2].plot(ts_compnts.seasonal)
     ax[3].plot(ts_compnts.resid)
-    
     for indx, title in enumerate(titles):
         ax[indx].set_ylabel(title)
         ax[indx].grid(True)
@@ -58,16 +68,21 @@ def plot_decomposition(series, figsize = (12, 9), grid=True):
 
 def plot_acf_pacf(series, lags=30, figsize=(12, 7)):
     """
-    Plots autocorrelation and partial autocorrelation functions 
-
+    Plots autocorrelation and partial autocorrelation functions.
+    
+    Parameters
+    ----------
     ts: pd.Series
-        Time Series
-
+        Time Series data.
     lags: int 
-        Max number of lags to plot
-
+        Max number of lags to plot.
     figsize: tuple 
-        Figure size
+        Figure size.
+        
+    Returns
+    -------
+    None 
+        Plots ACF/PACF graph.
     """
     plt.figure(figsize=figsize)
     ax = plt.subplot(211)
@@ -79,41 +94,46 @@ def plot_acf_pacf(series, lags=30, figsize=(12, 7)):
     plt.grid(True)
 
 
-def show_features_importances(model, features, n_splits, scoring, cluster_indx, target_col_name='n_trips'):
+def show_features_importances(
+    model,
+    features,
+    n_splits,
+    scoring,
+    cluster_indx,
+    target_col_name='n_trips'
+):
     """
-    Plots feature importance for a given cluster
-
-    model: Class (e.g. sklearn model/pipeline)
+    Plots feature importance for a given cluster.
     
+    Parameters
+    ----------
+    model: Class (e.g. sklearn model/pipeline)
     features: pd.DataFrame
-        DataFrame with features 
-
+        DataFrame with features. 
     n_splits: int 
-        Number of splits for Time Series Cross Validation 
-
+        Number of splits for Time Series Cross Validation.
     scoring: str
-        Metric to minimize during cross validation
-
+        Metric to minimize during cross validation.
     cluster_indx: int
-        Cluster index to show features importance for 
-
+        Cluster index to show features importance for.
     target_col_name: str
-        Target feature name
+        Target feature name.
 
     Returns:
     -------
-    None 
+    None
     """
     # Train data
     X_train = features.drop(columns=target_col_name)
     y_train = features[target_col_name]
 
     # Time Series CV
-    cv = cross_val_score(model, X_train, y_train,
-                        cv=TimeSeriesSplit(n_splits),
-                        scoring=scoring,
-                        n_jobs=-1)
-    
+    cv = cross_val_score(
+        model, X_train, y_train,
+        cv=TimeSeriesSplit(n_splits),
+        scoring=scoring,
+        n_jobs=-1
+    )
     cv_mae = round(cv.mean()*(-1),2)
 
     model.fit(X_train, y_train)
@@ -135,15 +155,17 @@ def downsize_features_pca(df, seed):
     """
     Downsizes TS features using PCA
 
+    Parameters
+    ----------
     df: pd.DataFrame 
-        Time Series data
-
+        Time Series data.
     seed: int 
-        Random Seed value
+        Random Seed value.
         
     Returns:
     -------
-    DataFrame 
+    pd.DataFrame
+        Reduced dataframe.
     """
     pca = PCA(random_state=seed)
     pca.fit(df)
@@ -152,4 +174,4 @@ def downsize_features_pca(df, seed):
     
     pca = PCA(n_components=n_components, random_state=seed)
     res_df = pca.fit_transform(df)
-    return 
+    return res_df

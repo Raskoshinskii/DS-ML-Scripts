@@ -4,28 +4,36 @@ import numpy as np
 from sklearn.model_selection import StratifiedKFold, cross_validate, cross_val_score
 
 
-def show_model_cvs(models, cv_type, X_train, y_train, metrics, is_aggregated=True):
-    
+def cross_validate_models(
+    models, cv_type,
+    X_train, y_train,
+    metrics, is_aggregated=True
+):
     """
-    Shows models results based on certain metrics and cross-validation type
+    Shows models results based on certain metrics and cross-validation type.
     
+    Parameters
+    ----------
     model: list 
         List of models to be evaluated (Class must be passed)
-
     cv_type: callable  
-        Type of cross-validation
-
+        Type of cross-validation.
     metrics: list
-        List of sklearn metrics
-    
+        List of sklearn metrics.
     is_aggregated: bool 
-        Wether to return aggregated result or for each fold 
+        Wether to return aggregated result or for each fold. 
     
+    Returns 
+    -------
+    pd.DataFrame
+        DataFrame with CV results.
     """
     res_df = pd.DataFrame()
-    
     for model in models:
-        cv_results = cross_validate(model, x=X_train, y=y_train, cv=cv_type, scoring=metrics)
+        cv_results = cross_validate(
+            model, x=X_train, y=y_train,
+            cv=cv_type, scoring=metrics
+        )
         cv_results['Model'] = str(model).split('(')[0] # extract the name of the current model 
         res_df = res_df.append(pd.DataFrame(cv_results))
         
@@ -40,25 +48,31 @@ def show_model_cvs(models, cv_type, X_train, y_train, metrics, is_aggregated=Tru
         return res_df[new_columns_order]
 
 
-def show_model_cvs(models, cv_type, X_train, y_train, metric, is_aggregated=True):
+def get_models_cross_val_score(
+    models, cv_type,
+    X_train, y_train,
+    metric, is_aggregated=True
+):
     """
-    Shows models results based on certain metrics and cross-validation type
+    Shows models results based on certain metrics and cross-validation type.
     
+    Parameters
+    ----------
     model: list 
-        List of models to be evaluated (Class must be passed)
-
+        List of models to be evaluated (Class must be passed).
     cv_type: callable  
-        Type of cross-validation
-
+        Type of cross-validation.
     metrics: list
-        List of sklearn metrics
-    
+        List of sklearn metrics.
     is_aggregated: bool 
-        Wether to return aggregated result or for each fold 
+        Wether to return aggregated result or for each fold.
     
+    Returns 
+    -------
+    pd.DataFrame
+        DataFrame with CV results.
     """
     res_df = pd.DataFrame()
-    
     for model in models:
         cv_results = cross_val_score(model, x=X_train, y=y_train, cv=cv_type, scoring=metric)
         res_df.append(pd.DataFrame({'Model': str(model).split('(')[0],

@@ -5,28 +5,24 @@ class ModelHyperparametersGridSearchCV:
     Class for hyperparameters optimizations using GridSearchCV
     CV type: cross_val_score
     
-    NOTE: Delete minus in _objective for return statement when using non regression metrics 
-    
+    NOTE: Delete minus in _objective for return statement when using non regression metrics.
     """
 
     def __init__(self, grid_type, model, X_train, y_train, params_space, cv_metric, cv_type, seed=23):
         """
+        
+        Parameters
+        ----------
         grid_type: callable
-            GridSearchCV or RandomizedSearchCV
-        
+            GridSearchCV or RandomizedSearchCV.
         model: callable
-        
         X_train/y_train: DataFrame
-        
         params_space: dict
-            Hyperparameters Space defined according to the Optuna documentation
-        
+            Hyperparameters Space defined according to the Optuna documentation.
         cv_metric: str or dict (google: "Running GridSearchCV using multiple evaluation metrics") 
-            Name for the metric to be used according (sklearn metrics)
-            
+            Name for the metric to be used according (sklearn metrics).
         cv_type: callable
-            Cross validation type
-
+            Cross validation type.
         """
         self.grid_type = grid_type
         self.model = model

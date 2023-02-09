@@ -7,7 +7,7 @@ from sklearn.preprocessing import RobustScaler
 
 class DistanceOutliers(BaseEstimator):
     """
-    Distance based outlier detector model
+    Distance based outlier detector model.
     
     Fit method calculates centroid of training samples and
     using `metric` get distances from centroid to train samples.
@@ -16,14 +16,12 @@ class DistanceOutliers(BaseEstimator):
     Predict method uses `threshold` and `metric` to determine, whether
     distance to sample from centroid is too large -> outlier.
     
-    -----------
-    Parameters:
-    
-    - metric: string, default - euclidean
-        metric to use for distance calculation (see scipy.spatial.distance.cdist)
-        
-    - percentile: float in range [0, 100]
-        hyperparameter which sets the threshold for anomalies
+    Parameters
+    ----------
+    metric: string, default - euclidean
+        Metric to use for distance calculation (see scipy.spatial.distance.cdist).
+    Percentile: float in range [0, 100]
+        Hyperparameter which sets the threshold for anomalies.
     """
     def __init__(self, metric='euclidean', percentile=90):
         self.metric = metric

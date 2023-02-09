@@ -9,36 +9,29 @@ class ModelHyperparametersOptuna:
     Class for hyperparameters optimizations using Hyperopt library
     CV type: cross_val_score
     
-    NOTE: Delete minus in _objective for return statement when using non regression metrics 
-    
+    NOTE: Delete minus in _objective for return statement when using non regression metrics.
     """
 
     def __init__(self, model, X_train, y_train, params_space, n_trials, cv_metric, cv_type, opt_algo='tpe', direction='maximize', seed=23):
         """
+        Parameters
+        ----------
         model: callable
-        
         X_train/y_train: DataFrame
-        
         params_space: dict
-            Hyperparameters Space defined according to the Optuna documentation
-        
+            Hyperparameters Space defined according to the Optuna documentation.
         n_trials: int
-            Number of iterations to find optimal hyperparameters
-            
+            Number of iterations to find optimal hyperparameters.
         cv_metric: str
-            Name for the metric to be used according (sklearn metrics)
-            
+            Name for the metric to be used according (sklearn metrics).
         cv_type: callable
-            Cross validation type
-            
+            Cross validation type.
         opt_algo: str
-            Type of an optimization algorithm
-            
+            Type of an optimization algorithm.
         direction: str
-            Wether to maximize or minimize the 
-            
+            Wether to maximize or minimize 
         opt_algo: callable
-            Type of an algorithm that searches in a hyperparameters space 
+            Type of an algorithm that searches in a hyperparameters space.
         """
         self.model = model
         self.X_train = X_train
@@ -57,8 +50,7 @@ class ModelHyperparametersOptuna:
         
     def _objective(self, trial):
         """
-        Defines the objective function
-        
+        Defines the objective function.
         """
             
         self.model.set_params(**self.params_space) 
