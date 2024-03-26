@@ -1,12 +1,12 @@
 def get_bin_cat_features(df):
     """
     Returns categorical and binary feature names.
-    
+
     Parameters
     ----------
     df: pd.DataFrame
         DataFrame with features.
-    
+
     Returns
     -------
     tuple
@@ -21,14 +21,14 @@ def get_bin_cat_features(df):
 
 def split_features(df):
     """
-    Splits DataFrame into several ones 
+    Splits DataFrame into several ones
     (binary, categorical, numeric).
-    
+
     Parameters
     ----------
-    df: pd.DataFrame 
+    df: pd.DataFrame
         DataFrame with features.
-    
+
     Returns
     -------
     tuple

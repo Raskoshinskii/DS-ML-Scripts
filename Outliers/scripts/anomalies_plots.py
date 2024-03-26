@@ -1,21 +1,19 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def plot_kde_plots(
-    data, n_rows, n_cols,
-    figsize=(15, 20)
-):
+
+def plot_kde_plots(data, n_rows, n_cols, figsize=(15, 20)):
     """
     Plots KDE plots for a given dataset using Seaborn
     Note: Features must be continuous!
-    
+
     Parameters
     ----------
     data: pd.DataFrame
         Main dataset.
     n_rows: int
         Number of rows.
-        
+
     Returns
     -------
     None

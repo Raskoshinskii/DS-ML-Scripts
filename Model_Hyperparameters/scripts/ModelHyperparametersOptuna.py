@@ -1,4 +1,4 @@
-import optuna 
+import optuna
 from optuna import samplers
 
 from sklearn.model_selection import cross_val_score
@@ -8,11 +8,23 @@ class ModelHyperparametersOptuna:
     """
     Class for hyperparameters optimizations using Hyperopt library
     CV type: cross_val_score
-    
+
     NOTE: Delete minus in _objective for return statement when using non regression metrics.
     """
 
-    def __init__(self, model, X_train, y_train, params_space, n_trials, cv_metric, cv_type, opt_algo='tpe', direction='maximize', seed=23):
+    def __init__(
+        self,
+        model,
+        X_train,
+        y_train,
+        params_space,
+        n_trials,
+        cv_metric,
+        cv_type,
+        opt_algo="tpe",
+        direction="maximize",
+        seed=23,
+    ):
         """
         Parameters
         ----------
@@ -29,7 +41,7 @@ class ModelHyperparametersOptuna:
         opt_algo: str
             Type of an optimization algorithm.
         direction: str
-            Wether to maximize or minimize 
+            Wether to maximize or minimize
         opt_algo: callable
             Type of an algorithm that searches in a hyperparameters space.
         """
@@ -43,27 +55,34 @@ class ModelHyperparametersOptuna:
         self.direction = direction
         self.seed = seed
         self.study = None
-        
-        if opt_algo == 'tpe':
+
+        if opt_algo == "tpe":
             self.opt_algo = samplers.TPESampler(self.seed)
-        
-        
+
     def _objective(self, trial):
         """
         Defines the objective function.
         """
-            
-        self.model.set_params(**self.params_space) 
-        
-        cv_score = cross_val_score(self.model, self.X_train, self.y_train,
-                                   scoring=self.cv_metric, cv=self.cv_type, n_jobs=-1)
+
+        self.model.set_params(**self.params_space)
+
+        cv_score = cross_val_score(
+            self.model,
+            self.X_train,
+            self.y_train,
+            scoring=self.cv_metric,
+            cv=self.cv_type,
+            n_jobs=-1,
+        )
         return cv_score.mean()
-    
+
     def optimize(self):
-        self.study = optuna.create_study(sampler=self.opt_algo, direction=self.direction)
+        self.study = optuna.create_study(
+            sampler=self.opt_algo, direction=self.direction
+        )
         self.study.optimize(self._objective, n_trials=self.n_trials)
-        
-        
+
+
 # model_hyperparameters = ModelHyperparameters(model=model_name, X_train=X_train, y_train=y_train, params_space=params_space,
 #                                              n_trials=50, cv_metric='roc_auc',
 #                                              cv_type=StratifiedKFold(shuffle=True, random_state=SEED))
